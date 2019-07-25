@@ -1,7 +1,7 @@
 from numpy import *
 from dynamo.tools.gillespie import *
 
-def f_prop(C, a1, b1, a2, b2, a1_l, b1_l, a2_l, b2_l, K, n, be1, ga1, et1, de1, be2, ga2, et2, de2):
+def f_prop(C, a1, b1, c1, a2, b2, c2, a1_l, b1_l, c1_l, a2_l, b2_l, c2_l, K, n, be1, ga1, et1, de1, be2, ga2, et2, de2):
     # unlabeled mRNA
     u1 = C[0]
     s1 = C[1]
@@ -21,10 +21,10 @@ def f_prop(C, a1, b1, a2, b2, a1_l, b1_l, a2_l, b2_l, K, n, be1, ga1, et1, de1, 
     # propensities
     prop = np.zeros(18)
     # transcription
-    prop[0] = a1 * p1**n / (K**n + p1**n) + b1 * K**n / (K**n + p2**n)         # 0 -> u1
-    prop[1] = a2 * p2**n / (K**n + p2**n) + b2 * K**n / (K**n + p1**n)         # 0 -> u2
-    prop[2] = a1_l * p1**n / (K**n + p1**n) + b1_l * K**n / (K**n + p2**n)     # 0 -> w1
-    prop[3] = a2_l * p2**n / (K**n + p2**n) + b2_l * K**n / (K**n + p1**n)     # 0 -> w2
+    prop[0] = a1 * p1**n / (K**n + p1**n) + b1 * K**n / (K**n + p2**n) + c1             # 0 -> u1
+    prop[1] = a2 * p2**n / (K**n + p2**n) + b2 * K**n / (K**n + p1**n) + c2             # 0 -> u2
+    prop[2] = a1_l * p1**n / (K**n + p1**n) + b1_l * K**n / (K**n + p2**n) + c1_l       # 0 -> w1
+    prop[3] = a2_l * p2**n / (K**n + p2**n) + b2_l * K**n / (K**n + p1**n) + c2_l       # 0 -> w2
     # splicing
     prop[4] = be1 * u1      # u1 -> s1
     prop[5] = be2 * u2      # u2 -> s2
@@ -91,7 +91,7 @@ def f_stoich():
 
     return stoich
 
-def simulate(a1, b1, a2, b2, a1_l, b1_l, a2_l, b2_l, K, n, be1, ga1, et1, de1, be2, ga2, et2, de2, C0, t_span, n_traj, report=False):
+def simulate(a1, b1, c1, a2, b2, c2, a1_l, b1_l, c1_l, a2_l, b2_l, c2_l, K, n, be1, ga1, et1, de1, be2, ga2, et2, de2, C0, t_span, n_traj, report=False):
     stoich = f_stoich()
     update_func = lambda C, mu: C + stoich[mu, :]
 
@@ -99,7 +99,7 @@ def simulate(a1, b1, a2, b2, a1_l, b1_l, a2_l, b2_l, K, n, be1, ga1, et1, de1, b
     trajs_C = [[]] * n_traj
 
     for i in range(n_traj):
-        T, C = directMethod(lambda C: f_prop(C, a1, b1, a2, b2, a1_l, b1_l, a2_l, b2_l, K, n, be1, ga1, et1, de1, be2, ga2, et2, de2), update_func, t_span, C0[i])
+        T, C = directMethod(lambda C: f_prop(C, a1, b1, c1, a2, b2, c2, a1_l, b1_l, c1_l, a2_l, b2_l, c2_l, K, n, be1, ga1, et1, de1, be2, ga2, et2, de2), update_func, t_span, C0[i])
         trajs_T[i] = T
         trajs_C[i] = C
         if report:
